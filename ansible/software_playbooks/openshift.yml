@@ -73,6 +73,7 @@
     - "{{ ('tag_' ~ env_type ~ '_' ~ guid ~ '_infranode') | replace('-', '_') }}"
     - "{{ ('tag_' ~ env_type ~ '_' ~ guid ~ '_node') | replace('-', '_') }}"
     - "{{ ('tag_' ~ env_type ~ '_' ~ guid ~ '_master') | replace('-', '_') }}"
+    - nodes
   vars_files:
     - "../configs/{{ env_type }}/env_vars.yml"
   roles:
