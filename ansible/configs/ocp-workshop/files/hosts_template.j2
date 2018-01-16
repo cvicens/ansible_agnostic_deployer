@@ -38,6 +38,7 @@ openshift_metrics_image_version=v{{ repo_version }}
 ###########################################################################
 openshift_storage_glusterfs_namespace=glusterfs
 openshift_storage_glusterfs_name=storage
+openshift_storage_glusterfs_storageclass_default=true
 {% endif %}
 
 ###########################################################################
@@ -380,6 +381,6 @@ new_nodes
 {% set query = "[?name=='support']|[0].volumes[?purpose=='glusterfs'].device_name" %}
 [glusterfs]
 {% for host in groups['support'] %}
-{{ hostvars[host].internaldns }} glusterfs_ip={{hostvars[host].private_ip_address}} glusterfs_devices='{{instances|json_query(query)}}'
+{{ hostvars[host].internaldns }} glusterfs_ip={{hostvars[host].private_ip_address}} glusterfs_devices='{{instances|json_query(query)|to_json}}'
 {% endfor %}
 {% endif %}
