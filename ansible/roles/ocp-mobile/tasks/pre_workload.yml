@@ -1,0 +1,104 @@
+---
+    
+# - name: Add user to developer group (allowed to create projects)
+#   shell: "oadm groups add-users {{item}} {{ocp_username}}"
+#   register: groupadd_register
+#   with_items: "{{ocp_user_groups}}"
+#   when: ocp_username is defined and ocp_user_groups is defined
+#
+# - name: test that command worked
+#   debug:
+#     var: groupadd_register
+#     verbosity: 2
+
+- name: Create user Quota - clusterresourcequota
+  shell: |
+        oc create clusterquota clusterquota-"{{ocp_username}}-{{guid}}" \
+        --project-annotation-selector=openshift.io/requester="{{ocp_username}}" \
+        --hard requests.cpu="{{quota_requests_cpu}}" \
+        --hard limits.cpu="{{quota_limits_cpu}}"  \
+        --hard requests.memory="{{quota_requests_memory}}" \
+        --hard limits.memory="{{quota_limits_memory}}" \
+        --hard configmaps="{{quota_configmaps}}" \
+        --hard pods="{{quota_pods}}" \
+        --hard persistentvolumeclaims="{{quota_persistentvolumeclaims}}"  \
+        --hard services="{{quota_services}}" \
+        --hard secrets="{{quota_secrets}}" \
+        --hard requests.storage="{{quota_requests_storage}}"
+  ignore_errors: true
+
+- hosts: nodes
+  vars_files:
+    - ../../env.yml
+    - ../vars/bb9.yml
+
+  tasks:
+  # Activate subscription-manager  
+  - name: Check subscription status on all nodes
+    shell: subscription-manager status
+    register: subs
+    ignore_errors: yes
+  - set_fact:
+      subs_status={{ true if (subs.stdout | search("Current")) else false }}
+  - name: Subscribe nodes
+    shell: subscription-manager register --username="{{ rhn_username }}" --password="{{ rhn_password }}"
+    when: subs_status|bool == false
+  
+  # Attach RHM POOL ID
+  - name: Get Red Hat Mobile pool ID
+    shell: subscription-manager list --available --matches=*Mobile* --pool-only | head -1 -
+    register: rhmap_pool_id
+    run_once: true
+  - name: Attach pool ID ( "{{ rhmap_pool_id.stdout }}" ) on all hosts
+    shell: subscription-manager attach --pool="{{ rhmap_pool_id.stdout }}"
+
+  # Refresh certificates
+  - name: Refresh certificates
+    shell: subscription-manager refresh
+
+- hosts: bastion
+  vars_files:
+    - ../../env.yml
+    - ../vars/bb9.yml
+  tasks:
+
+# Enable RHM repo & install templates
+  - name: Enable Red Hat Mobile repos
+    shell: subscription-manager repos --enable="{{ rhmap_repo }}"
+
+  - name: Install templates & playbooks on bastion
+    yum:  
+      name: "rhmap-fh-openshift-templates"
+      state: latest
+
+# Prepare RHMAP inventory file
+  - name: Setup ansible inventory for RHMAP
+    template:
+      src: hosts_rhmap
+      dest: /etc/ansible/hosts_rhmap
+      mode: 0640
+
+# Seed RHM docker images to nodes
+  - block:
+    - name: Seed rhmap core docker images to nodes
+      shell: ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml -e "project_type=core" -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-core.out 2>&1
+      async: 5400
+      poll: 30
+      register: seed_core
+
+    - fail: msg="Failed to seed core images to nodes. Check log output /tmp/rhmap-seed-core.out"
+      when: seed_core.rc is undefined or seed_core.rc != 0
+  
+  - block:
+    - name: Seed rhmap mbaas docker images to nodes
+      shell: ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml -e "project_type=mbaas" -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-mbaas 2>&1
+      async: 5400
+      poll: 30
+      register: seed_mbaas
+
+    - fail: msg="Failed to seed mbaas images to nodes. Check log output /tmp/rhmap-seed-mbaas.out"
+      when: seed_mbaas.rc is undefined or seed_mbaas.rc != 0
+
+- name: pre_workload Tasks Complete
+  debug:
+    msg: "Pre-Software checks completed successfully"

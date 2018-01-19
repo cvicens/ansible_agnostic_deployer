@@ -1,0 +1,56 @@
+---
+rhn_username: cvicensa@redhat.com
+rhn_password: dummy
+
+rhmap_version: "4.5"
+rhmap_repo: "rhel-7-server-rhmap-4.5-rpms"
+
+ocp_master_host_name: "master01"
+ocp_admin: "admin"
+ocp_admin_pwd: "change12_me"
+
+# Required PVs
+required_25_pv: 3
+required_5_pv: 3
+required_1_pv: 2
+
+proxy_password: ""
+
+# Custom variables
+mbaas_monitoring:
+  smtp_server: "localhost"
+  smtp_username: "username"
+  smtp_password: "password"
+  smtp_from_address: "nagios@example.com"
+  rhmap_admin_email: "root@localhost"
+
+mbaas_frontend:
+  smtp_server: "localhost"
+  smtp_username: "username"
+  smtp_password: "password"
+  smtp_port: "25"
+  smtp_auth: "false"
+  smtp_tls: "false"
+  email_replyto: "noreply@localhost"
+  git_external_protocol: "http"
+  builder_android_service_host: "https://farm.eu.redhatmobile.com"
+  builder_iphone_service_host: "https://farm.eu.redhatmobile.com"
+
+ocp_username: shachar-redhat.com
+ocp_user_needs_quota: True
+
+ocp_user_groups:
+  - OPENTLC-PROJECT-PROVISIONERS
+
+quota_requests_cpu: 5
+quota_limits_cpu: 10
+
+quota_requests_memory: '6Gi'
+quota_limits_memory: '20Gi'
+
+quota_configmaps: 10
+quota_pods: 20
+quota_persistentvolumeclaims: 20
+quota_services: 30
+quota_secrets: 30
+quota_requests_storage: 50Gi
