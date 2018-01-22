@@ -7,7 +7,7 @@ WORKLOAD="mobile-storage"
 GUID=3005
 
 # a TARGET_HOST is specified in the command line, without using an inventory file
-ansible-playbook  -i ../test.hosts --limit bastion ./configs/ocp-workloads/ocp-workload.yml \
+ansible-playbook  -i ../test.hosts --limit bastion ./software_playbooks/mobile.yml \
                 -e "ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key" \
                 -e "ansible_ssh_user=vagrant" \
                 -e "env_type=mobile" \

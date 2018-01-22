@@ -1,0 +1,66 @@
+# This is an example of a bring your own (byo) host inventory
+
+[OSEv3:children]
+lb
+masters
+etcd
+nodes
+nfs
+
+# Set variables common for all OSEv3 hosts
+[OSEv3:vars]
+
+###########################################################################
+### Ansible Vars
+###########################################################################
+timeout=60
+
+
+# SSH user, this user should allow ssh based auth without requiring a password.
+ansible_ssh_user=ec2-user
+
+# If ansible_ssh_user is not root, ansible_become must be set to true and the
+# user must be configured for passwordless sudo
+ansible_become=yes
+
+# Debug level for all OpenShift components (Defaults to 2)
+debug_level=2
+
+# host group for masters
+
+[lb]
+#ose3-lb-ansible.test.example.com containerized=false
+loadbalancer1.0cbe.internal host_zone=eu-central-1a
+
+[masters]
+#ose3-master[1:3]-ansible.test.example.com
+master1.0cbe.internal host_zone=eu-central-1a
+master2.0cbe.internal host_zone=eu-central-1a
+master3.0cbe.internal host_zone=eu-central-1a
+
+[etcd]
+#ose3-etcd[1:3]-ansible.test.example.com
+master1.0cbe.internal host_zone=eu-central-1a
+master2.0cbe.internal host_zone=eu-central-1a
+master3.0cbe.internal host_zone=eu-central-1a
+
+[nodes]
+#ose3-master[1:3]-ansible.test.example.com
+#ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
+
+## These are the masters
+master1.0cbe.internal openshift_hostname=master1.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+master2.0cbe.internal openshift_hostname=master2.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+master3.0cbe.internal openshift_hostname=master3.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+
+## These are infranodes
+infranode1.0cbe.internal openshift_hostname=infranode1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
+infranode2.0cbe.internal openshift_hostname=infranode2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
+
+## These are regular nodes
+node1.0cbe.internal openshift_hostname=node1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node2.0cbe.internal openshift_hostname=node2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node3.0cbe.internal openshift_hostname=node3.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+
+[nfs]
+support1.0cbe.internal openshift_hostname=support1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem
