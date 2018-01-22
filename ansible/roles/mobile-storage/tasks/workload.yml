@@ -31,6 +31,8 @@
 - name: Iterate over required PVs and set up NFS
   include_tasks: setup_nfs.yml
   with_dict: "{{ required_pvs }}"
+  loop_control:
+    loop_var: required_pv
 
 #- name: Prepare PVs
 #  block:

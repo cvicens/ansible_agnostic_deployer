@@ -1,0 +1,74 @@
+[GenericExample:vars]
+
+###########################################################################
+### Ansible Vars
+###########################################################################
+timeout=60
+ansible_become=yes
+ansible_ssh_user={{ansible_ssh_user}}
+
+[Nodes:children]
+master
+core
+mbaas
+
+[Nodes:vars]
+skip_tls=true
+
+ansible_ssh_user=root
+ansible_sudo=true
+
+# Valid targets enterprise or dedicated
+target="enterprise"
+
+#Cluster hostanme
+cluster_hostname={{ ocp_master_host_name }}
+
+#Customer subdomain name
+domain_name="rhmap"
+
+#The address and port of the OpenShift API server
+login_url=https://{{ api_dns }}:8443
+
+# OpenShift Credentials
+oc_user={{ ocp_admin }}
+oc_password={{ ocp_admin_pwd }}
+
+kubeconfig="/etc/origin/master/admin.kubeconfig"
+
+# Add values here if a HTTP proxy server is to be used
+proxy_host={{ proxy_http.split(':')[0] }}
+proxy_port={{ proxy_http.split(':')[1] if proxy_http.split(':')|length > 1 else ''}}
+proxy_user={{ proxy_username }}
+proxy_pass={{ proxy_password }}
+
+# Optional (default value is 'http'), uncomment to change protocol to https - buildfarm only
+# proxy_protocol="https"
+
+# For proxy_url the syntax should be: http://<proxy-host>:<proxy-port> or http://<proxy_user>:<proxy_pass>@<proxy-host>:<proxy-port>
+proxy_url=""
+
+# URL to be checked to test outbound HTTP connection. Must be whitelisted if using a HTTP Proxy server
+url_to_check="https://www.npmjs.com"
+
+#### Gluster config - Set if using Gluster FS for storage
+gluster_storage= false
+
+# Custom variables
+monitoring= {{ mbaas_monitoring }}
+frontend= {{ mbaas_frontend }}
+
+[master]
+{% for host in groups['masters'] %}
+{{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
+{% endfor %}
+
+[mbaas]
+{% for host in groups['mbaas'] %}
+{{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
+{% endfor %}
+
+[core]
+{% for host in groups['core'] %}
+{{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
+{% endfor %}

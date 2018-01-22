@@ -1,5 +1,4 @@
 ---
-redis_instances: 2
 
 base_exports_dir: /etc/exports.d
 mobile_exports_table: mobile-vols.exports
@@ -17,5 +16,5 @@ required_pvs:
     size: 3
   required_1_pvs:
     capacity: 1
-    size: 2
+    size: 5
   

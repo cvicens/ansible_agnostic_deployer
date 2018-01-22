@@ -1,17 +1,5 @@
 ---
 
-- block:
-    - name: register redis instances
-      debug: msg="do something"
-      with_sequence: start=6379 end={{ 6379 + (redis_instances - 1) }}
-      register: monit_redis_services
-
-    - set_fact:
-        mysequence: "{{ monit_redis_services.results | map(attribute='item') | list }}"
-
-    - debug: var=mysequence
-  when: ACTION == "create"
-
 - name: Running Pre Workload Tasks
   include: ./pre_workload.yml
   become: true
