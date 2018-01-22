@@ -1,23 +1,27 @@
 ---
 
 - debug:
-    msg: "Setting up nfs for {{ required_pv.key }}"
+    msg: "Setting up PVs for {{ required_pv.key }}"
 
 - name: Create as many directories as stated by the outer item
-  file:
-    path: "{{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ item }}"
-    state: directory
+  shell: |
+    cat << EOF | oc create -f -
+      apiVersion: v1
+      kind: PersistentVolume
+      metadata:
+        name: {{ item }}
+      spec:
+        capacity:
+          storage: {{ required_pv.value.capacity }}Gi 
+        accessModes:
+          - ReadWriteOnce 
+        persistentVolumeReclaimPolicy: Recycle
+        nfs: 
+          path: {{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ item }}
+          server: {{ inventory_hostname }}
+          readOnly: false
+    EOF
+    register: create_pvs
   with_sequence: start=1 end={{ required_pv.value.size }} format={{ required_pv.key }}_%02x
 
-- name: Add mappings to exports table
-  blockinfile:
-    path: "{{ base_exports_dir }}/{{ mobile_exports_table }}"
-    block: |
-      "{{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ item }} *(rw,root_squash)"
-    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ item }}"
-  with_sequence: start=1 end={{ required_pv.value.size }} format={{ required_pv.key }}_%02x
 
-
-#echo "/srv/nfs/user-vols/pv${pvnum} *(rw,root_squash)" >> /etc/exports.d/openshift-uservols.exports
-#chown -R nfsnobody.nfsnobody  /srv/nfs
-#chmod -R 777 /srv/nfs

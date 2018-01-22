@@ -34,6 +34,12 @@
   loop_control:
     loop_var: required_pv
 
+- name: Iterate over required PVs and create PVs
+  include_tasks: setup_pvs.yml
+  with_dict: "{{ required_pvs }}"
+  loop_control:
+    loop_var: required_pv
+
 #- name: Prepare PVs
 #  block:
 #    - file:
