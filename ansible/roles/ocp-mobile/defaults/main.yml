@@ -1,15 +1,30 @@
 ---
+
+redis_instances: 10
+
 rhn_username: cvicensa@redhat.com
 rhn_password: dummy
 
 rhmap_version: "4.5"
 rhmap_repo: "rhel-7-server-rhmap-4.5-rpms"
 
+api_dns: "master01"
 ocp_master_host_name: "master01"
 ocp_admin: "admin"
 ocp_admin_pwd: "change12_me"
 
 # Required PVs
+required_pvs:
+  required_25_pvs:
+    capacity: 25
+    size: 3
+  required_5_pvs:
+    capacity: 5
+    size: 3
+  required_1_pvs:
+    capacity: 1
+    size: 2
+  
 required_25_pv: 3
 required_5_pv: 3
 required_1_pv: 2

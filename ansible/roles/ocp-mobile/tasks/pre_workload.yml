@@ -1,38 +1,20 @@
 ---
-    
-# - name: Add user to developer group (allowed to create projects)
-#   shell: "oadm groups add-users {{item}} {{ocp_username}}"
-#   register: groupadd_register
-#   with_items: "{{ocp_user_groups}}"
-#   when: ocp_username is defined and ocp_user_groups is defined
-#
-# - name: test that command worked
-#   debug:
-#     var: groupadd_register
-#     verbosity: 2
 
-- name: Create user Quota - clusterresourcequota
-  shell: |
-        oc create clusterquota clusterquota-"{{ocp_username}}-{{guid}}" \
-        --project-annotation-selector=openshift.io/requester="{{ocp_username}}" \
-        --hard requests.cpu="{{quota_requests_cpu}}" \
-        --hard limits.cpu="{{quota_limits_cpu}}"  \
-        --hard requests.memory="{{quota_requests_memory}}" \
-        --hard limits.memory="{{quota_limits_memory}}" \
-        --hard configmaps="{{quota_configmaps}}" \
-        --hard pods="{{quota_pods}}" \
-        --hard persistentvolumeclaims="{{quota_persistentvolumeclaims}}"  \
-        --hard services="{{quota_services}}" \
-        --hard secrets="{{quota_secrets}}" \
-        --hard requests.storage="{{quota_requests_storage}}"
-  ignore_errors: true
+#- debug: msg="hostvars={{hostvars}}"
+#- debug: msg="vars={{vars}}"
+- debug: msg="group_names={{group_names}}"
+- debug: msg="groups={{groups}}"
+#  when: "'vagrant1' not in play_hosts"
+#when: inventory_hostname in groups['frontendcluster1']
+- name: Show hosts
+  debug: msg="inventory_hostname {{ inventory_hostname }} play_hosts {{ play_hosts }} ansible_host {{ ansible_host }} xyz {{ xyz }}"
+  when: inventory_hostname in groups.masters
+  
 
-- hosts: nodes
-  vars_files:
-    - ../../env.yml
-    - ../vars/bb9.yml
-
-  tasks:
+# Tasks to be excute on all nodes
+# See: https://access.redhat.com/documentation/en-us/red_hat_mobile_application_platform/4.5/html/installing_rhmap/preparing-infrastructure-for-installation
+- name: Run on all nodes
+  block: 
   # Activate subscription-manager  
   - name: Check subscription status on all nodes
     shell: subscription-manager status
@@ -56,48 +38,83 @@
   - name: Refresh certificates
     shell: subscription-manager refresh
 
-- hosts: bastion
-  vars_files:
-    - ../../env.yml
-    - ../vars/bb9.yml
-  tasks:
+# Tasks to be executed only in the bastion server
+# 2.1. Install the RHMAP OpenShift Templates
+- name: Run on bastion
+  block:
+    # Enabling RHM repos
+    - name: Enable Red Hat Mobile repos
+      shell: subscription-manager repos --enable="{{ rhmap_repo }}"
 
-# Enable RHM repo & install templates
-  - name: Enable Red Hat Mobile repos
-    shell: subscription-manager repos --enable="{{ rhmap_repo }}"
+    # Installing templates
+    - name: Install templates & playbooks on bastion
+      yum:  
+        name: "rhmap-fh-openshift-templates"
+        state: latest
 
-  - name: Install templates & playbooks on bastion
-    yum:  
-      name: "rhmap-fh-openshift-templates"
-      state: latest
-
-# Prepare RHMAP inventory file
-  - name: Setup ansible inventory for RHMAP
-    template:
-      src: hosts_rhmap
-      dest: /etc/ansible/hosts_rhmap
-      mode: 0640
-
-# Seed RHM docker images to nodes
-  - block:
+    # 2.2.2. Setting Up an Inventory File
+    - name: Setup ansible inventory for RHMAP
+      template:
+        src: hosts_rhmap
+        dest: /etc/ansible/hosts_rhmap
+        mode: 0640
+  when: "'bastion' not in play_hosts"
+  
+# 2.3. Seeding the Nodes with the RHMAP Images 
+- block:
     - name: Seed rhmap core docker images to nodes
-      shell: ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml -e "project_type=core" -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-core.out 2>&1
+      shell: |
+        export ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ \
+        ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml \
+        -e "project_type=core" \
+        -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-core.out 2>&1
       async: 5400
       poll: 30
       register: seed_core
 
     - fail: msg="Failed to seed core images to nodes. Check log output /tmp/rhmap-seed-core.out"
       when: seed_core.rc is undefined or seed_core.rc != 0
-  
-  - block:
-    - name: Seed rhmap mbaas docker images to nodes
-      shell: ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml -e "project_type=mbaas" -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-mbaas 2>&1
-      async: 5400
-      poll: 30
-      register: seed_mbaas
 
-    - fail: msg="Failed to seed mbaas images to nodes. Check log output /tmp/rhmap-seed-mbaas.out"
-      when: seed_mbaas.rc is undefined or seed_mbaas.rc != 0
+- block:
+  - name: Seed rhmap mbaas docker images to nodes
+    shell: |
+      export ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ \
+      ansible-playbook -i /etc/ansible/hosts_rhmap /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml \
+      -e "project_type=mbaas" \
+      -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-mbaas 2>&1
+    async: 5400
+    poll: 30
+    register: seed_mbaas
+
+  - fail: msg="Failed to seed mbaas images to nodes. Check log output /tmp/rhmap-seed-mbaas.out"
+    when: seed_mbaas.rc is undefined or seed_mbaas.rc != 0
+
+- name: Prepare PVs
+  block:
+    - file:
+      path: /etc/exports.d/rhmap-vols.exports
+      state: touch
+      mode: 755
+
+    - file:
+      path: /srv/nfs/rhmap-vols/
+      state: directory
+      mode: 0755
+
+    - name: Iterate over required PVs
+      include_tasks: setup_nfs.yml
+      with_dict: "{{ required_pvs }}"
+      
+
+#mkdir -p /srv/nfs/user-vols/pv{1..100}
+#
+#for pvnum in {1..100} ; do
+#echo "/srv/nfs/user-vols/pv${pvnum} *(rw,root_squash)" >> /etc/exports.d/openshift-uservols.exports
+#chown -R nfsnobody.nfsnobody  /srv/nfs
+#chmod -R 777 /srv/nfs
+#done
+#
+#systemctl restart nfs-server
 
 - name: pre_workload Tasks Complete
   debug:

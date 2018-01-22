@@ -1,10 +1,8 @@
 ---
 
-- debug: msg="ANSIBLE_REPO_PATH = {{ ANSIBLE_REPO_PATH }}"
-
 - block:
     - name: register redis instances
-      debug: msg="do something {{ item }}"
+      debug: msg="do something"
       with_sequence: start=6379 end={{ 6379 + (redis_instances - 1) }}
       register: monit_redis_services
 
@@ -12,22 +10,22 @@
         mysequence: "{{ monit_redis_services.results | map(attribute='item') | list }}"
 
     - debug: var=mysequence
-  when: ACTION == "test"
+  when: ACTION == "create"
 
 - name: Running Pre Workload Tasks
   include: ./pre_workload.yml
   become: true
-  when: ACTION == "create" or ACTION == "provision" or ACTION == "test"
+  when: ACTION == "create" or ACTION == "provision"
 
 - name: Running Workload Tasks
   include: ./workload.yml
   become: true
-  when: ACTION == "create" or ACTION == "provision" or ACTION == "test"
+  when: ACTION == "create" or ACTION == "provision"
 
 - name: Running Post Workload Tasks
   include: ./post_workload.yml
   become: true
-  when: ACTION == "create" or ACTION == "provision" or ACTION == "test"
+  when: ACTION == "create" or ACTION == "provision"
 
 - name: Running Workload removal Tasks
   include: ./remove_workload.yml

@@ -1,0 +1,21 @@
+---
+redis_instances: 2
+
+base_exports_dir: /etc/exports.d
+mobile_exports_table: mobile-vols.exports
+
+base_nfs_dir: /srv/nfs
+mobile_nfs_dir: mobile-vols
+
+# Required PVs
+required_pvs:
+  required_25_pvs:
+    capacity: 25
+    size: 3
+  required_5_pvs:
+    capacity: 5
+    size: 3
+  required_1_pvs:
+    capacity: 1
+    size: 2
+  
