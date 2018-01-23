@@ -1,0 +1,4 @@
+---
+# handlers file for mobile-storage
+- name: restart nfs
+  service: name=nfs state=restarted

@@ -24,8 +24,9 @@
 
 - name: Confirm NFS dir is ready
   file:
-    path: /srv/nfs/rhmap-vols/
+    path: "{{ base_nfs_dir }}/{{ mobile_nfs_dir }}"
     state: directory
+    recurse: yes
     mode: 0755
 
 - name: Iterate over required PVs and set up NFS

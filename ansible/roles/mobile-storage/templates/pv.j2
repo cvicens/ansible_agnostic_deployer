@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: pv$i 
+  name: {{ pv_item }}
 spec:
   capacity:
-    storage: 1Gi 
+    storage: {{ required_pv.value.capacity }}Gi 
   accessModes:
     - ReadWriteOnce 
   persistentVolumeReclaimPolicy: Recycle
   nfs: 
-    path: $NFS_ROOT_PATH/pv$i
-    server: $NFS_SERVER
+    path: {{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ pv_item }}
+    server: {{ inventory_hostname }}
     readOnly: false

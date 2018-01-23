@@ -161,7 +161,7 @@
     - block:
       - name: Deploy Red Hat Mobile Core
         shell: |
-          ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version }}"/rhmap-installer/roles/ \
+          ANSIBLE_ROLES_PATH=/opt/rhmap/{{ rhmap_version }}/rhmap-installer/roles/ \
           ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/{{ rhmap_version }}/rhmap-installer/playbooks/core.yml \
             -e "strict_mode=false" > /tmp/rhmap-deploy-core.out 2>&1
         async: 5400
@@ -177,7 +177,7 @@
     - block:
       - name: Deploy Red Hat Mobile MBaaS
         shell: |
-          ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version }}"/rhmap-installer/roles/ \
+          ANSIBLE_ROLES_PATH=/opt/rhmap/{{ rhmap_version }}/rhmap-installer/roles/ \
           ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/{{ rhmap_version }}/rhmap-installer/playbooks/1-node-mbaas.yml \
             -e "strict_mode=false" --skip-tags "label" > /tmp/rhmap-deploy-mbaas.out 2>&1'
         async: 5400

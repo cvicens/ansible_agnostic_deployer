@@ -1,0 +1,21 @@
+---
+
+- debug:
+    msg: "Setting up nfs for {{ nfs_item }}"
+
+- name: Create {{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ nfs_item }}
+  file:
+    path: "{{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ nfs_item }}"
+    state: directory
+
+- name: Add mappings to exports table for {{ nfs_item }}"
+  blockinfile:
+    path: "{{ base_exports_dir }}/{{ mobile_exports_table }}"
+    block: |
+      "{{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ nfs_item }} *(rw,root_squash)"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK {{ nfs_item }}"
+
+
+#echo "/srv/nfs/user-vols/pv${pvnum} *(rw,root_squash)" >> /etc/exports.d/openshift-uservols.exports
+#chown -R nfsnobody.nfsnobody  /srv/nfs
+#chmod -R 777 /srv/nfs

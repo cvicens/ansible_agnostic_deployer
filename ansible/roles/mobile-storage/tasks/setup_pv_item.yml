@@ -1,0 +1,16 @@
+---
+
+- debug:
+    msg: "Setting up PVs for {{ pv_item }}"
+
+- name: Create /tmp/{{ pv_item }}
+  template: src=pv.j2 dest=/tmp/{{ pv_item }}
+  register: create_pvs
+  tags: setup_pvs
+
+- name: Actually create the PV in OCP
+  shell: |
+    echo "oc create -f /tmp/{{ pv_item }}"
+  tags: setup_pvs
+
+

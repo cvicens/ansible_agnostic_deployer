@@ -3,25 +3,20 @@
 - debug:
     msg: "Setting up PVs for {{ required_pv.key }}"
 
-- name: Create as many directories as stated by the outer item
-  shell: |
-    cat << EOF | oc create -f -
-      apiVersion: v1
-      kind: PersistentVolume
-      metadata:
-        name: {{ item }}
-      spec:
-        capacity:
-          storage: {{ required_pv.value.capacity }}Gi 
-        accessModes:
-          - ReadWriteOnce 
-        persistentVolumeReclaimPolicy: Recycle
-        nfs: 
-          path: {{ base_nfs_dir }}/{{ mobile_nfs_dir }}/{{ item }}
-          server: {{ inventory_hostname }}
-          readOnly: false
-    EOF
-    register: create_pvs
+- name: Create as many PVs as stated by the outer item
+  include_tasks: setup_pv_item.yml
   with_sequence: start=1 end={{ required_pv.value.size }} format={{ required_pv.key }}_%02x
+  loop_control:
+    loop_var: pv_item
+  tags: setup_pvs
+
+#- name: Create
+#  shell: |
+#    echo oc create -f /tmp/...
+#  async: 5400
+#  poll: 30
+#  register: install_mbaas
+#  tags:
+#  - mobile_installer
 
 
