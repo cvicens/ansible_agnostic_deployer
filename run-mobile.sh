@@ -9,8 +9,8 @@ GUID=0cbe
 
 # a TARGET_HOST is specified in the command line, without using an inventory file
 ansible-playbook -vvv -i ../mobile.hosts ./software_playbooks/mobile.yml \
-                -e "ansible_ssh_private_key_file=.vagrant/machines/default/virtualbox/private_key" \
-                -e "ansible_ssh_user=vagrant" \
+                -e "ansible_ssh_private_key_file=~/.ssh/${GUID}key.pem" \
+                -e "ansible_ssh_user=ec2-user" \
                 -e "env_type=${ENV_TYPE}" \
                 -e "ANSIBLE_REPO_PATH=`pwd`" \
                 -e "ocp_username=${OCP_USERNAME}" \
