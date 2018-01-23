@@ -133,7 +133,7 @@
   vars_files:
     - "../configs/{{ env_type }}/env_vars.yml"
   roles:
-    - { role: "../roles/mobile-storage", dir: '/opt/a', app_port: 5000 }
+    - "../roles/mobile-storage"
   tags:
     - mobile_storage
 
