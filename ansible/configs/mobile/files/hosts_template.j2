@@ -60,17 +60,23 @@ gluster_storage= false
 monitoring= {{ mbaas_monitoring }}
 frontend= {{ mbaas_frontend }}
 
+{% if groups['masters'] is defined %}
 [master]
 {% for host in groups['masters'] %}
 {{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
 {% endfor %}
+{% endif %}
 
+{% if groups['mbaas'] is defined %}
 [mbaas]
 {% for host in groups['mbaas'] %}
 {{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
 {% endfor %}
+{% endif %}
 
+{% if groups['core'] is defined %}
 [core]
 {% for host in groups['core'] %}
 {{ hostvars[host].internaldns }} host_zone={{hostvars[host].placement}}
 {% endfor %}
+{% endif %}

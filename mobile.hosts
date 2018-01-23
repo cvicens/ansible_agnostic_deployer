@@ -28,6 +28,9 @@ debug_level=2
 
 # host group for masters
 
+[bastions]
+tag_mobile_0cbe_bastion ansible_host=bastion.0cbe.example.opentlc.com placement=east1 internaldns=master1.0cbe.internal host_zone=eu-central-1a 
+
 [lb]
 #ose3-lb-ansible.test.example.com containerized=false
 loadbalancer1.0cbe.internal internaldns=loadbalancer1.0cbe.internal host_zone=eu-central-1a
