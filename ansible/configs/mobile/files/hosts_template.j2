@@ -37,10 +37,12 @@ oc_password={{ ocp_admin_pwd }}
 kubeconfig="/etc/origin/master/admin.kubeconfig"
 
 # Add values here if a HTTP proxy server is to be used
+{% if proxy_http is defined %}
 proxy_host={{ proxy_http.split(':')[0] }}
 proxy_port={{ proxy_http.split(':')[1] if proxy_http.split(':')|length > 1 else ''}}
-proxy_user={{ proxy_username }}
-proxy_pass={{ proxy_password }}
+proxy_user={{ proxy_username | default('') }}
+proxy_pass={{ proxy_password | default('') }}
+{% endif %}
 
 # Optional (default value is 'http'), uncomment to change protocol to https - buildfarm only
 # proxy_protocol="https"

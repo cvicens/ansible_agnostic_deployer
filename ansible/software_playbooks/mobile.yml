@@ -9,7 +9,7 @@
   gather_facts: False
   vars_files:
     - "../configs/{{ env_type }}/env_vars.yml"
-    - "../configs/{{ env_type }}/env_secret_vars.yml"
+    #- "../configs/{{ env_type }}/env_secret_vars.yml"
   tags:
     - generate_ansible_hosts_file
   tasks:
@@ -26,7 +26,7 @@
   gather_facts: False
   vars_files:
     - "../configs/{{ env_type }}/env_vars.yml"
-    - "../configs/{{ env_type }}/env_secret_vars.yml"
+    #- "../configs/{{ env_type }}/env_secret_vars.yml"
   tags:
     - rhmap_host_templates
   tasks:
@@ -61,10 +61,10 @@
     - block:
       - name: Seed rhmap core docker images to nodes
         shell: |
-          ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ \
-          ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml \
+          ANSIBLE_ROLES_PATH=/opt/rhmap/{{ rhmap_version }}/rhmap-installer/roles/ \
+          ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/{{ rhmap_version }}/rhmap-installer/playbooks/seed-images.yml \
           -e "project_type=core" \
-          -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-core.out 2>&1
+          -e "rhmap_version={{ rhmap_version }}" > /tmp/rhmap-seed-core.out 2>&1
         async: 5400
         poll: 30
         register: seed_core
@@ -75,10 +75,10 @@
     - block:
       - name: Seed rhmap mbaas docker images to nodes
         shell: |
-          ANSIBLE_ROLES_PATH=/opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/roles/ \
-          ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/"{{ rhmap_version}}"/rhmap-installer/playbooks/seed-images.yml \
+          ANSIBLE_ROLES_PATH=/opt/rhmap/{{ rhmap_version }}/rhmap-installer/roles/ \
+          ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/{{ rhmap_version }}/rhmap-installer/playbooks/seed-images.yml \
           -e "project_type=mbaas" \
-          -e "rhmap_version='{{ rhmap_version }}'" > /tmp/rhmap-seed-mbaas 2>&1
+          -e "rhmap_version={{ rhmap_version }}" > /tmp/rhmap-seed-mbaas 2>&1
         async: 5400
         poll: 30
         register: seed_mbaas
@@ -179,7 +179,7 @@
         shell: |
           ANSIBLE_ROLES_PATH=/opt/rhmap/{{ rhmap_version }}/rhmap-installer/roles/ \
           ansible-playbook -i {{ hosts_rhmap }} /opt/rhmap/{{ rhmap_version }}/rhmap-installer/playbooks/1-node-mbaas.yml \
-            -e "strict_mode=false" --skip-tags "label" > /tmp/rhmap-deploy-mbaas.out 2>&1'
+            -e "strict_mode=false" --skip-tags "label" > /tmp/rhmap-deploy-mbaas.out 2>&1
         async: 5400
         poll: 30
         register: install_mbaas

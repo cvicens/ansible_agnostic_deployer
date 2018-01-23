@@ -30,37 +30,44 @@ debug_level=2
 
 [lb]
 #ose3-lb-ansible.test.example.com containerized=false
-loadbalancer1.0cbe.internal host_zone=eu-central-1a
+loadbalancer1.0cbe.internal internaldns=loadbalancer1.0cbe.internal host_zone=eu-central-1a
 
 [masters]
 #ose3-master[1:3]-ansible.test.example.com
-master1.0cbe.internal host_zone=eu-central-1a
-master2.0cbe.internal host_zone=eu-central-1a
-master3.0cbe.internal host_zone=eu-central-1a
+master1.0cbe.internal placement=east1 internaldns=master1.0cbe.internal host_zone=eu-central-1a
+master2.0cbe.internal placement=east1 internaldns=master2.0cbe.internal host_zone=eu-central-1a
+master3.0cbe.internal placement=east1 internaldns=master3.0cbe.internal host_zone=eu-central-1a
 
 [etcd]
 #ose3-etcd[1:3]-ansible.test.example.com
-master1.0cbe.internal host_zone=eu-central-1a
-master2.0cbe.internal host_zone=eu-central-1a
-master3.0cbe.internal host_zone=eu-central-1a
+master1.0cbe.internal placement=east1 internaldns=master1.0cbe.internal host_zone=eu-central-1a
+master2.0cbe.internal placement=east1 internaldns=master2.0cbe.internal host_zone=eu-central-1a
+master3.0cbe.internal placement=east1 internaldns=master3.0cbe.internal host_zone=eu-central-1a
 
 [nodes]
 #ose3-master[1:3]-ansible.test.example.com
 #ose3-node[1:2]-ansible.test.example.com openshift_node_labels="{'region': 'primary', 'zone': 'default'}"
 
 ## These are the masters
-master1.0cbe.internal openshift_hostname=master1.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
-master2.0cbe.internal openshift_hostname=master2.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
-master3.0cbe.internal openshift_hostname=master3.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+master1.0cbe.internal placement=east1 internaldns=master1.0cbe.internal openshift_hostname=master1.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+master2.0cbe.internal placement=east1 internaldns=master2.0cbe.internal openshift_hostname=master2.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
+master3.0cbe.internal placement=east1 internaldns=master3.0cbe.internal openshift_hostname=master3.0cbe.internal ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','openshift_schedulable':'False','cluster': '0cbe', 'zone': 'eu-central-1a'}"
 
 ## These are infranodes
-infranode1.0cbe.internal openshift_hostname=infranode1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
-infranode2.0cbe.internal openshift_hostname=infranode2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
+infranode1.0cbe.internal placement=east1 internaldns=infranode1.0cbe.internal openshift_hostname=infranode1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
+infranode2.0cbe.internal placement=east1 internaldns=infranode2.0cbe.internal openshift_hostname=infranode2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'infra', 'zone': 'eu-central-1a'}"
 
 ## These are regular nodes
-node1.0cbe.internal openshift_hostname=node1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
-node2.0cbe.internal openshift_hostname=node2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
-node3.0cbe.internal openshift_hostname=node3.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node1.0cbe.internal placement=east1 internaldns=node1.0cbe.internal openshift_hostname=node1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node2.0cbe.internal placement=east1 internaldns=node2.0cbe.internal openshift_hostname=node2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node3.0cbe.internal placement=east1 internaldns=node3.0cbe.internal openshift_hostname=node3.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
 
 [nfs]
-support1.0cbe.internal openshift_hostname=support1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem
+support1.0cbe.internal placement=east1 internaldns=support1.0cbe.internal openshift_hostname=support1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem
+
+[core]
+node1.0cbe.internal placement=east1 internaldns=node1.0cbe.internal openshift_hostname=node1.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+
+[mbaas]
+node2.0cbe.internal placement=east1 internaldns=node2.0cbe.internal openshift_hostname=node2.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
+node3.0cbe.internal placement=east1 internaldns=node3.0cbe.internal openshift_hostname=node3.0cbe.internal  ansible_ssh_user=ec2-user ansible_ssh_private_key_file=~/.ssh/ocpkey.pem openshift_node_labels="{'logging':'true','cluster': '0cbe', 'env':'app', 'zone': 'eu-central-1a'}"
